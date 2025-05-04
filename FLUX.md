@@ -36,12 +36,8 @@ imagines progression from staging to production - leaving it to versioning.
 
 ## Multitenancy
 
-There is a concept of a "tenant" under development in Flux.
-
-Generate namespace, svc account, role bindings for a tenant:
-```
-https://fluxcd.io/flux/cmd/flux_create_tenant/
-```
+There is a concept of a "tenant" under development in Flux:
+https://github.com/fluxcd/flux2-multi-tenancy
 
 ## Optional image update automation
 
