@@ -91,30 +91,17 @@ done
 
 # Check if cluster exists
 if ! kind get clusters | grep -q "^${CLUSTER_NAME}$"; then
-  echo "Kind cluster '$CLUSTER_NAME' not found. Creating it first..."
+  echo "Kind cluster '$CLUSTER_NAME' not found. Creating it first."
   ./create-kind-cluster.sh --name "$CLUSTER_NAME"
 fi
 
 # Set kubectl context to the kind cluster
 kubectl config use-context "kind-$CLUSTER_NAME"
 
-echo "Bootstrap Flux on cluster '$CLUSTER_NAME'"
-
-# Create GitHub deploy key for Flux
-TMPKEY=$(mktemp -d)/flux-key
-ssh-keygen -q -N "" -C "flux-${CLUSTER_NAME}" -t ed25519 -f "$TMPKEY"
-PUB_KEY=$(cat "${TMPKEY}.pub")
-
-# Add the deploy key to the GitHub repository
-echo "Adding deploy key to GitHub repository..."
-curl -s -X POST "https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/keys" \
-  -H "Authorization: token ${GITHUB_TOKEN}" \
-  -H "Accept: application/vnd.github.v3+json" \
-  -d "{\"title\":\"Flux deploy key for ${CLUSTER_NAME}\",\"key\":\"${PUB_KEY}\",\"read_only\":true}"
 
 echo "Checking Flux prerequisites"
 flux check --pre
-echo "Bootstrapping Flux on the cluster..."
+echo "Bootstrapping Flux on cluster '$CLUSTER_NAME'"
 flux bootstrap github \
   --owner="${GITHUB_USER}" \
   --repository="${GITHUB_REPO}" \
@@ -125,9 +112,6 @@ flux bootstrap github \
 
 echo "Private key is stored in the cluster as a Kubernetes secret named flux-system in namespace $FLUX_NAMESPACE"
 # Key rotation: https://fluxcd.io/flux/installation/bootstrap/generic-git-server/#ssh-private-key
-
-# Clean up temporary files
-rm -f "$TMPKEY" "${TMPKEY}.pub"
 
 echo "Flux has been bootstrapped successfully!"
 echo "To verify that Flux is running, execute: kubectl get pods -n ${FLUX_NAMESPACE}"
