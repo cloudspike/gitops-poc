@@ -1,0 +1,18 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+# By default, kind uses 10.244.0.0/16 pod subnet for IPv4 and fd00:10:244::/56 pod subnet for IPv6.
+# By default, kind uses 10.96.0.0/16 service subnet for IPv4 and fd00:10:96::/112 service subnet for IPv6.
+networking:
+  ipFamily: ipv6
+  # IPv6 port forwards do not work on Docker on Windows or Mac. Need to use an IPv4 port forward
+  apiServerAddress: 127.0.0.1
+  kubeProxyMode: "nftables"  # Default is iptables
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 80
+        protocol: TCP
+      - containerPort: 443
+        hostPort: 443
+        protocol: TCP
