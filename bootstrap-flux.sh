@@ -29,6 +29,7 @@ function check_param {
   if [ -z "$2" ]; then
     echo "Error: $1 is required"
     show_help
+    exit 1
   fi
 }
 
@@ -114,8 +115,9 @@ curl -s -X POST "https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/keys
 echo "Checking Flux prerequisites"
 flux check --pre
 echo "Bootstrapping Flux on the cluster..."
-flux bootstrap git \
-  --url="ssh://git@github.com/${GITHUB_USER}/${GITHUB_REPO}" \
+flux bootstrap github \
+  --owner="${GITHUB_USER}" \
+  --repository="${GITHUB_REPO}" \
   --branch=main \
   --path="clusters/$CLUSTER_NAME" \
   --private-key-file="${TMPKEY}" \
